@@ -1,0 +1,28 @@
+{
+  "camera": {
+    "device_id": 0,
+    "resolution": [1280, 720],
+    "capture_interval_seconds": 1.0
+  },
+  "quality_check": {
+    "min_dimension_mm": 45.0,
+    "max_dimension_mm": 55.0,
+    "min_surface_score": 0.85,
+    "allowed_color_deviation": 0.1
+  },
+  "robot": {
+    "connection": "simulated",
+    "port": "COM3",
+    "baud_rate": 115200,
+    "move_speed_mm_s": 250,
+    "bins": {
+      "pass": "BIN_A",
+      "fail": "BIN_B",
+      "rework": "BIN_C"
+    }
+  },
+  "logging": {
+    "output_path": "data/production_log.csv",
+    "level": "INFO"
+  }
+}
