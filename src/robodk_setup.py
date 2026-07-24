@@ -77,11 +77,13 @@ def add_box(rdk: Robolink, name: str, size_mm: tuple, color_rgba: list, parent):
     if existing.Valid():
         existing.Delete()
     # AddShape rejects a Frame passed directly as add_to, so attach the
-    # parent afterwards via setParentStatic instead.
+    # parent afterwards. setParent (not setParentStatic) keeps the box's
+    # local pose at identity, i.e. sitting right at the parent frame's
+    # origin instead of jumping back to wherever it was created.
     box = rdk.AddShape(_box_triangles(*size_mm))
     box.setName(name)
     box.setColor(color_rgba)
-    box.setParentStatic(parent)
+    box.setParent(parent)
     return box
 
 
