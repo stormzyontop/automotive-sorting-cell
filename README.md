@@ -18,7 +18,8 @@ automotive-sorting-cell/
 │   ├── quality_check.py      # measurement -> pass/fail logic
 │   ├── robot_control.py      # simulated robot interface
 │   ├── production_logger.py  # CSV production logging
-│   └── robodk_setup.py       # builds the station in RoboDK (table, workpieces, sorting bins)
+│   ├── robodk_setup.py       # builds the station in RoboDK (table, workpieces, sorting bins)
+│   └── robodk_simulate.py    # drives the robot through a pick -> inspect -> sort cycle
 ├── docs/
 │   └── demo.gif
 ├── data/
@@ -57,9 +58,31 @@ python src/robodk_setup.py
 ```
 
 The script is idempotent — re-running it rebuilds the cell from scratch
-instead of duplicating items. It only builds the layout; it does not yet
-drive the robot's motion, so `main.py` still runs as an independent logic
-simulation (see below).
+instead of duplicating items.
+
+## RoboDK pick-and-sort simulation
+
+[src/robodk_simulate.py](src/robodk_simulate.py) actually drives the
+robot: it (re)builds the station, assigns each of the three workpieces a
+random "true" category (pass / fail / rework) and tints it to match that
+bin's color — standing in for what a real vision/quality inspection would
+report — then picks each part off the table, moves it to the matching
+bin, and releases it. Every target pose is checked for reachability with
+`SolveIK` before any motion starts, so an out-of-reach layout fails fast
+with a clear error instead of a mid-run RoboDK fault.
+
+```bash
+python src/robodk_simulate.py
+```
+
+After the cycle, it verifies the result and prints a report — this is
+the "pre-colored parts, check the robot actually sorts them correctly"
+self-test: each workpiece's final parent bin AND its actual world
+position (must fall inside that bin's footprint) are checked against its
+assigned category. Exit code is 0 if every part landed correctly, 1
+otherwise, so it can be scripted/re-run repeatedly. `main.py` remains a
+separate, independent logic-only simulation (random measurements → CSV),
+not wired to the RoboDK motion.
 
 ## Tests
 

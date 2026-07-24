@@ -41,10 +41,13 @@ BIN_SIZE_MM = (350, 350, 180)  # open-top sorting bin: footprint + wall height
 
 # bin id (see config.json -> robot.bins) -> (frame name, position relative to cell frame, RGBA color)
 # On the opposite side of the robot from the table, fanned out in a row.
+# Kept within ~475mm of the robot base (IRB120-3/0.6 max reach is 580mm) so
+# every bin is comfortably reachable, including the top-down wrist orientation
+# used for placing, which needs extra clearance near the reach limit.
 BINS = {
-    "BIN_A": ("Bin Pass", (-400, 400, 0), [0.25, 0.7, 0.3, 1.0]),
-    "BIN_B": ("Bin Fail", (0, 400, 0), [0.75, 0.25, 0.25, 1.0]),
-    "BIN_C": ("Bin Rework", (400, 400, 0), [0.85, 0.7, 0.15, 1.0]),
+    "BIN_A": ("Bin Pass", (-320, 350, 0), [0.25, 0.7, 0.3, 1.0]),
+    "BIN_B": ("Bin Fail", (0, 350, 0), [0.75, 0.25, 0.25, 1.0]),
+    "BIN_C": ("Bin Rework", (320, 350, 0), [0.85, 0.7, 0.15, 1.0]),
 }
 
 
@@ -96,7 +99,7 @@ def _open_box_triangles(sx: float, sy: float, sz: float) -> list:
     return triangles
 
 
-def _retry(fn, attempts: int = 5, delay: float = 0.3):
+def retry_call(fn, attempts: int = 5, delay: float = 0.3):
     """Retry a RoboDK API call a few times.
 
     RoboDK's API occasionally rejects a command with "Invalid item
@@ -139,7 +142,7 @@ def add_frame(rdk: Robolink, name: str, xyz_mm: tuple, parent=0, show_axes: bool
         # "attach to station root"), so only reparent when a real parent
         # Item was given. Also, Item.__ne__ doesn't handle comparison
         # against a bare int, so check the type instead of "!= 0".
-        _retry(lambda: frame.setParent(parent))
+        retry_call(lambda: frame.setParent(parent))
     frame.setPose(transl(*xyz_mm))
     frame.setVisible(show_axes)
     return frame
@@ -160,7 +163,7 @@ def add_mesh(rdk: Robolink, file_path: str, name: str, scale, color_rgba, parent
     # setParent (not setParentStatic) keeps the item's local pose at
     # identity, i.e. sitting right at the parent frame's origin instead
     # of jumping back to wherever AddFile happened to place it.
-    _retry(lambda: item.setParent(parent))
+    retry_call(lambda: item.setParent(parent))
     item.setPose(transl(*local_xyz_mm))
     return item
 
@@ -173,7 +176,7 @@ def add_box(rdk: Robolink, name: str, size_mm: tuple, color_rgba: list, parent, 
     box = rdk.AddShape(triangles)
     box.setName(name)
     box.setColor(color_rgba)
-    _retry(lambda: box.setParent(parent))
+    retry_call(lambda: box.setParent(parent))
     box.setPose(transl(0, 0, 0))
     return box
 
