@@ -14,11 +14,23 @@ robodk_setup.build_station()) and a robot within reach of both the table
 and the bins -- see robodk_setup.py for the layout.
 """
 
+import os
 import random
 import sys
 import time
 
-sys.path.insert(0, __file__.rsplit("\\", 1)[0] if "\\" in __file__ else __file__.rsplit("/", 1)[0])
+# When run from a terminal, robodk_setup.py sits next to this file. When
+# run from inside RoboDK (File > Open > double-click / F5), RoboDK copies
+# the script to a temp folder first, so the same-directory guess breaks --
+# fall back to this project's known src/ location on this machine.
+_CANDIDATE_DIRS = [
+    os.path.dirname(os.path.abspath(__file__)),
+    r"C:\Users\kimil\Desktop\automotive-sorting-cell\src",
+]
+for _dir in _CANDIDATE_DIRS:
+    if os.path.isfile(os.path.join(_dir, "robodk_setup.py")) and _dir not in sys.path:
+        sys.path.insert(0, _dir)
+        break
 
 from robodk.robolink import ITEM_TYPE_FRAME, ITEM_TYPE_ROBOT, Robolink
 from robodk.robomath import pi, rotx, transl
