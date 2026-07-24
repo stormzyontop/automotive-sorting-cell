@@ -18,7 +18,7 @@ automotive-sorting-cell/
 │   ├── quality_check.py      # measurement -> pass/fail logic
 │   ├── robot_control.py      # simulated robot interface
 │   ├── production_logger.py  # CSV production logging
-│   └── robodk_setup.py       # builds the station in RoboDK (frames, pallets, workpiece)
+│   └── robodk_setup.py       # builds the station in RoboDK (table, workpieces, sorting bins)
 ├── docs/
 │   └── demo.gif
 ├── data/
@@ -46,11 +46,11 @@ thresholds in [config.json](config.json), and writes results to
 ## RoboDK station
 
 [src/robodk_setup.py](src/robodk_setup.py) builds a visual station in
-[RoboDK](https://robodk.com/): an ABB IRB 120, a base cell frame, an infeed
-frame with a placeholder workpiece, and three pallets (pass / fail /
-rework) whose bin IDs match `robot.bins` in [config.json](config.json).
-Requires RoboDK to be installed (it will auto-start if not already
-running):
+[RoboDK](https://robodk.com/): an ABB IRB 120, an infeed table holding
+three workpieces to pick and inspect, and three open-top sorting bins
+(pass / fail / rework) whose bin IDs match `robot.bins` in
+[config.json](config.json). Requires RoboDK to be installed (it will
+auto-start if not already running):
 
 ```bash
 python src/robodk_setup.py
